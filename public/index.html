@@ -618,13 +618,16 @@ function render(S=1){
   const ramp=state.metalOwn?ownRamp(state.metalOwn):lut4(METALS[state.metal]);
   const g=state.finish, N=L.w*L.h;
   const kHi=L.kHi, cPen=lightContrast(penC), cSt=lightContrast(stC);
+  // Layers upscaled for export carry a 1 px source edge smeared over S px;
+  // steepen alpha back so the silhouette stays as crisp as the photo.
+  const aSl=S>1?1+0.6*(S-1):1;
   // A cut-out lands on backgrounds the pen was never lit against. The silhouette's
   // grazing highlight runs 0.40-0.87 in the white-light channel where the barrel
   // itself sits at 0.02-0.15, so capping that channel at the barrel's own level
   // removes the rim and leaves everything else exactly as photographed.
   const sCap=state.bg==='transparent'?0.16:1;
   for(let q=0;q<N;q++){
-    const i=q*4, cov=A[i+2]/255;
+    const i=q*4, c0=A[i+2]/255, cov=aSl===1?c0:Math.min(1,Math.max(0,(c0-0.5)*aSl+0.5));
     if(cov<0.0015){o[i+3]=0;continue;}
     const k0=A[i]/200, s=A[i+1]/255;
     const k=kHi-(kHi-k0)*cPen, kd=kHi-(kHi-k0)*cSt;

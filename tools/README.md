@@ -89,3 +89,17 @@ skyggemodelleringen ligger på tværs. Derfor glattes der kraftigt *langs* aksen
 stort set ikke *på tværs*. Det fjerner JPEG-blokke uden at røre cylinderformen.
 Standardværdien er 9 px. Er kilden tabsfri, kan man sætte den ned; `--denoise 0`
 slår det fra.
+
+## Efterbehandling: `refine_layers.py`
+
+Kør efter `build_layers.py`, når lagene ligger i `public/`:
+
+```bash
+python refine_layers.py ../public
+```
+
+Den retter skaftets kanter til rette linjer med sub-pixel antialiasing (ingen
+trappetrin), trykker den lyse rand fra fotobaggrunden sammen, og glatter lakken
+langs aksen, så JPEG-bølger ikke ses på mørke farver. Positurernes akse og
+`barrelT` står øverst i scriptet og skal matche `POSES` i `index.html`.
+Kør den kun én gang pr. sæt lag.
