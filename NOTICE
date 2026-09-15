@@ -1,0 +1,49 @@
+NOTICE — indhold der ikke er omfattet af MIT-licensen
+=====================================================
+
+Koden i dette repo er MIT-licenseret (se LICENSE). Følgende indhold er det ikke.
+
+
+Lag-filer afledt af produktfotografier
+--------------------------------------
+
+    public/pen_v1.png   public/pen_v2.png   public/pen_v3.png
+    public/pen_d1.png   public/pen_d2.png   public/pen_d3.png
+
+Disse filer er beregnet ud fra produktfotografier af Chili Concept BND188AL NOCLIP.
+De indeholder ikke fotografierne selv, men koefficienter udledt af dem — og
+fotografiernes lys, struktur og kanter kan rekonstrueres fra dem. De skal derfor
+behandles som afledt materiale af Chili Concepts fotografier.
+
+Ophavsretten til de oprindelige fotografier tilhører Chili Concept. Filerne
+distribueres her til brug i Metz A/S' salgsarbejde med produktet.
+
+Skal værktøjet bruges uden for den sammenhæng, så byg egne lag fra egne
+fotografier med tools/build_layers.py. Værktøjet er ikke bundet til denne pen —
+det virker på ethvert aflangt produkt fotograferet på ren baggrund.
+
+
+Eksempel-logo
+-------------
+
+    public/sample-logo.png
+
+Neutral pladsholder lavet til dette repo. Ingen rettigheder knyttet.
+
+Kundelogoer uploades af brugeren i browseren. De sendes ikke til nogen server,
+gemmes ikke, og indgår ikke i dette repo.
+
+
+Skrifttyper
+-----------
+
+Siden henter Archivo, IBM Plex Sans og IBM Plex Mono fra Google Fonts. Begge
+familier er SIL Open Font License 1.1. De er ikke bundtet i repoet.
+
+
+Produktdata
+-----------
+
+Mål, trykfelter, materialer og leveringstider i siden er gengivet fra Chili
+Concepts datablad for BND188AL og tilhører dem. De er medtaget som reference,
+så en sælger kan se dem sammen med mockup'en.

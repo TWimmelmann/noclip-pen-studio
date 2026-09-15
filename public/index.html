@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NOCLIP Pen Studio — Metz A/S</title>
+<meta name="description" content="Farvekonfigurator til Chili Concept BND188AL NOCLIP. Vælg penfarve, overflade, metaldele og logo, og hent et færdigt produktbillede.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="NOCLIP Pen Studio">
+<meta property="og:description" content="Byg produktbilleder af NOCLIP-kuglepennen i kundens farver.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%96%8A%3C/text%3E%3C/svg%3E">
+<style>
+  html{color-scheme:light dark}
+  body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#EBEAE6; --surface:#FFFFFF; --sunk:#E3E1DC;
+  --ink:#16181B; --ink-2:#3D4045; --muted:#6B6862;
+  --line:#D6D3CC; --line-soft:#E4E2DC;
+  --accent:#A81E14; --accent-ink:#FFFFFF;
+  --zone1:#C0392B; --zoneall:#2E7D32;
+  --shadow:0 1px 2px rgba(22,24,27,.06),0 8px 24px rgba(22,24,27,.06);
+  --r:3px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#151618; --surface:#1E2023; --sunk:#121315;
+    --ink:#ECEAE6; --ink-2:#C2BFB9; --muted:#948F87;
+    --line:#32353A; --line-soft:#26292D;
+    --accent:#E0533F; --accent-ink:#17181A;
+    --zone1:#E2705F; --zoneall:#63B168;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#151618; --surface:#1E2023; --sunk:#121315;
+  --ink:#ECEAE6; --ink-2:#C2BFB9; --muted:#948F87;
+  --line:#32353A; --line-soft:#26292D;
+  --accent:#E0533F; --accent-ink:#17181A;
+  --zone1:#E2705F; --zoneall:#63B168;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased}
+.wrap{max-width:1360px; margin:0 auto; padding-block:28px 56px; padding-left:20px; padding-right:20px}
+
+.mast{display:flex; flex-wrap:wrap; align-items:flex-end; gap:16px 28px; padding-bottom:16px; border-bottom:1.5px solid var(--ink)}
+.mast h1{font-family:Archivo,system-ui,sans-serif; font-weight:700; font-size:clamp(24px,3.2vw,34px); letter-spacing:-.02em; margin:0; text-wrap:balance}
+.mast .sku{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px; letter-spacing:.14em; color:var(--muted); text-transform:uppercase; margin:0 0 4px}
+.mast p{margin:0; color:var(--muted); max-width:46ch}
+.mast .right{margin-left:auto; display:flex; gap:8px; align-items:center}
+
+.grid{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr); gap:24px; margin-top:24px; align-items:start}
+@media (max-width:940px){ .grid{grid-template-columns:1fr} }
+
+.stage-col{position:sticky; top:20px; display:flex; flex-direction:column; gap:12px}
+@media (max-width:940px){ .stage-col{position:static} }
+.stage{position:relative; background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); overflow:hidden; aspect-ratio:1/1; max-width:100%;
+  display:flex; align-items:center; justify-content:center}
+.stage.drag{outline:2px dashed var(--accent); outline-offset:-8px}
+.stage canvas{width:100%; height:100%; display:block; max-width:100%; position:relative}
+#checker{position:absolute; inset:0; display:none;
+  background-image:linear-gradient(45deg,#00000010 25%,transparent 25%,transparent 75%,#00000010 75%),
+                   linear-gradient(45deg,#00000010 25%,transparent 25%,transparent 75%,#00000010 75%);
+  background-size:22px 22px; background-position:0 0,11px 11px; background-color:#fff}
+:root[data-theme="dark"] #checker{background-color:#2a2c30}
+.stage-bar{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+.stage-bar .spacer{flex:1 1 auto}
+.stage-bar .dim{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+
+.specs{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px}
+.specs h3{font-family:Archivo,sans-serif; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; font-weight:600}
+.specs dl{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px 18px; margin:0}
+.specs div{display:flex; flex-direction:column; gap:1px; min-width:0}
+.specs dt{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:500}
+.specs dd{margin:0; font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere}
+
+.rail{display:flex; flex-direction:column; gap:2px}
+.panel{background:var(--surface); border:1px solid var(--line); border-bottom:none; padding:16px}
+.panel:first-child{border-radius:var(--r) var(--r) 0 0}
+.panel:last-child{border-bottom:1px solid var(--line); border-radius:0 0 var(--r) var(--r)}
+.panel > h2{font-family:Archivo,sans-serif; font-size:10px; font-weight:600; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--muted); margin:0 0 12px; display:flex; align-items:baseline; gap:8px}
+.panel > h2 .part{font-family:"IBM Plex Mono",monospace; letter-spacing:.06em; color:var(--ink-2); font-size:10px}
+.note{font-size:12px; color:var(--muted); margin:10px 0 0; line-height:1.45}
+.sublabel{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 8px}
+
+.sw-row{display:flex; flex-wrap:wrap; gap:10px}
+.sw{appearance:none; border:none; background:none; padding:0; cursor:pointer; width:56px;
+  display:flex; flex-direction:column; align-items:center; gap:5px; color:inherit; font:inherit}
+.sw .chip{width:34px; height:34px; border-radius:50%; border:1px solid var(--line);
+  box-shadow:inset 0 0 0 3px var(--surface),0 0 0 1px transparent; transition:box-shadow .12s}
+.sw[aria-pressed="true"] .chip{box-shadow:inset 0 0 0 3px var(--surface),0 0 0 2px var(--ink)}
+.sw span.lbl{font-size:10px; line-height:1.2; text-align:center; color:var(--muted)}
+.sw[aria-pressed="true"] span.lbl{color:var(--ink); font-weight:600}
+.sw:focus-visible .chip{outline:2px solid var(--accent); outline-offset:3px}
+
+.seg{display:flex; border:1px solid var(--line); border-radius:var(--r); overflow:hidden; width:fit-content; max-width:100%; flex-wrap:wrap}
+.seg button{appearance:none; border:none; background:var(--surface); color:var(--ink-2); cursor:pointer;
+  font:500 12px/1 "IBM Plex Sans",sans-serif; padding:8px 14px; border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--ink); color:var(--surface)}
+.seg button:focus-visible{outline:2px solid var(--accent); outline-offset:-2px}
+
+.hexrow{display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap}
+.hexrow label{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+input[type=color]{appearance:none; -webkit-appearance:none; width:34px; height:34px; padding:0;
+  border:1px solid var(--line); border-radius:50%; background:none; cursor:pointer; overflow:hidden}
+input[type=color]::-webkit-color-swatch-wrapper{padding:2px}
+input[type=color]::-webkit-color-swatch{border:none; border-radius:50%}
+input[type=text].hex{font-family:"IBM Plex Mono",monospace; font-size:12.5px; text-transform:uppercase;
+  width:96px; padding:7px 9px; border:1px solid var(--line); border-radius:var(--r);
+  background:var(--sunk); color:var(--ink)}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+
+.slider{display:grid; grid-template-columns:1fr auto; gap:4px 10px; align-items:center; margin-top:12px}
+.slider label{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+.slider output{font-family:"IBM Plex Mono",monospace; font-size:12px; font-variant-numeric:tabular-nums; color:var(--ink-2)}
+.slider input[type=range]{grid-column:1/-1; width:100%; accent-color:var(--accent)}
+
+.btn{appearance:none; cursor:pointer; font:600 12.5px/1 "IBM Plex Sans",sans-serif;
+  padding:10px 16px; border-radius:var(--r); border:1px solid var(--line); background:var(--surface); color:var(--ink)}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{border-color:transparent; color:var(--muted); padding:10px 8px}
+.btn.ghost:hover{color:var(--ink)}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+
+.drop{border:1px dashed var(--line); border-radius:var(--r); padding:14px; text-align:center; background:var(--sunk); cursor:pointer}
+.drop:hover{border-color:var(--ink-2)}
+.drop strong{display:block; font-size:12.5px; font-weight:600}
+.drop small{color:var(--muted); font-size:11.5px}
+.filerow{display:flex; align-items:center; gap:10px; margin-top:10px; font-size:12px}
+.filerow .name{font-family:"IBM Plex Mono",monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1 1 auto; min-width:0}
+.trimrow{margin-top:10px}
+.chk{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--ink-2); cursor:pointer}
+.chk input{accent-color:var(--accent); width:15px; height:15px; margin:0}
+.trimnote{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--muted); margin:8px 0 0; min-height:1em}
+.fit{font-family:"IBM Plex Mono",monospace; font-size:11.5px; margin-top:10px; display:flex; gap:6px; align-items:center}
+.dot{width:7px; height:7px; border-radius:50%; flex:none}
+.ok{background:var(--zoneall)} .over{background:var(--zone1)}
+.toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--ink); color:var(--ground);
+  padding:10px 16px; border-radius:var(--r); font-size:12.5px; box-shadow:var(--shadow); z-index:40; max-width:90vw}
+.loading{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--muted); background:var(--surface)}
+footer{margin-top:28px; padding-top:14px; border-top:1px solid var(--line-soft); color:var(--muted); font-size:12px}
+footer p{margin:0 0 6px; max-width:96ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <p class="sku">Chili Concept · BND188AL</p>
+      <h1>NOCLIP Pen Studio</h1>
+    </div>
+    <p>Vælg farver, læg kundens logo på og hent et færdigt produktbillede. Bygget på rigtige produktfotos, så lys, gummistruktur og kanter er de ægte.</p>
+    <div class="right"><button class="btn ghost" id="themeBtn" type="button">Tema</button></div>
+  </header>
+
+  <div class="grid">
+    <div class="stage-col">
+      <div class="stage" id="stage">
+        <div id="checker"></div>
+        <canvas id="view" width="800" height="800" aria-label="Produktvisning af NOCLIP kuglepen"></canvas>
+        <div class="loading" id="loading">Indlæser lag …</div>
+      </div>
+
+      <div class="stage-bar">
+        <div class="seg" id="poseSeg" role="group" aria-label="Positur">
+          <button type="button" data-p="vert" aria-pressed="true">Lodret</button>
+          <button type="button" data-p="diag" aria-pressed="false">Diagonal</button>
+        </div>
+        <div class="seg" id="bgSeg" role="group" aria-label="Baggrund">
+          <button type="button" data-bg="#FFFFFF" aria-pressed="true">Hvid</button>
+          <button type="button" data-bg="transparent" aria-pressed="false">Transparent</button>
+          <button type="button" data-bg="#EDEBE7" aria-pressed="false">Lys grå</button>
+        </div>
+        <div class="seg" id="shadowSeg" role="group" aria-label="Skygge">
+          <button type="button" data-s="0" aria-pressed="true">Ingen skygge</button>
+          <button type="button" data-s="0.6" aria-pressed="false">Let</button>
+          <button type="button" data-s="1" aria-pressed="false">Skygge</button>
+        </div>
+      </div>
+      <div class="stage-bar">
+        <button class="btn" id="zoneBtn" type="button" aria-pressed="false">Vis trykfelt</button>
+        <div class="seg" id="frameSeg" role="group" aria-label="Billedramme">
+          <button type="button" data-f="square" aria-pressed="true">Kvadrat</button>
+          <button type="button" data-f="portrait" aria-pressed="false">Tæt</button>
+        </div>
+        <div class="seg" id="sizeSeg" role="group" aria-label="Eksportstørrelse">
+          <button type="button" data-x="1" aria-pressed="true">1×</button>
+          <button type="button" data-x="2" aria-pressed="false">2×</button>
+        </div>
+        <span class="dim" id="dimTxt">1600 × 1600 px</span>
+        <span class="spacer"></span>
+        <button class="btn" id="resetBtn" type="button">Nulstil</button>
+        <button class="btn primary" id="dlBtn" type="button">Hent PNG</button>
+      </div>
+
+      <section class="specs">
+        <h3>Specifikationer fra leverandørens datablad</h3>
+        <dl>
+          <div><dt>Varenummer</dt><dd>BND188AL</dd></div>
+          <div><dt>Mål</dt><dd>140 × 9,5 mm Ø</dd></div>
+          <div><dt>Vægt</dt><dd>0,018 kg</dd></div>
+          <div><dt>Materiale</dt><dd>60 % genanvendt aluminium</dd></div>
+          <div><dt>Trykfelt zone 1</dt><dd>50 × 6 mm</dd></div>
+          <div><dt>All over 360°</dt><dd>106 × 29,83 mm</dd></div>
+          <div><dt>Refill</dt><dd>Parker-type, 1500 m</dd></div>
+          <div><dt>Leveringstid</dt><dd>20–50 dage + fragt</dd></div>
+        </dl>
+      </section>
+    </div>
+
+    <div class="rail">
+      <section class="panel">
+        <h2>Penfarve <span class="part">Part 1</span></h2>
+        <p class="sublabel">Lagerfarver — målt på rigtige penne</p>
+        <div class="sw-row" id="penSw"></div>
+        <div class="hexrow">
+          <label for="penHex">Egen Pantone</label>
+          <input type="color" id="penPick" value="#1B3B59" aria-label="Vælg penfarve">
+          <input type="text" class="hex" id="penHex" value="#1B3B59" spellcheck="false" aria-label="Penfarve hex-kode">
+        </div>
+        <p class="note">Lagerfarverne er kalibreret mod fotos af faktiske Chili-penne, så de rammer varen. Skriver du selv en kode, gengives den bogstaveligt på lakkens lyse flader.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Overflade <span class="part">Main finishing</span></h2>
+        <div class="seg" id="finishSeg" role="group" aria-label="Overflade">
+          <button type="button" data-g="1.55" aria-pressed="false">Blank</button>
+          <button type="button" data-g="0.62" aria-pressed="false">Mat</button>
+          <button type="button" data-g="1" aria-pressed="true">Gummi</button>
+        </div>
+        <p class="note">Gummi gengiver kildefotoet præcist — det er den overflade pennene er fotograferet i. Blank og mat skalerer glansen op og ned og er stadig skøn, indtil der findes referencefotos af de to.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Metaldele <span class="part">Color part 2</span></h2>
+        <div class="sw-row" id="metalSw"></div>
+        <div class="hexrow">
+          <label for="metHex">Egen Pantone</label>
+          <input type="color" id="metPick" value="#7A6A3A" aria-label="Vælg farve på metaldele">
+          <input type="text" class="hex" id="metHex" value="#7A6A3A" spellcheck="false" aria-label="Metaldele hex-kode">
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Stylus-top</h2>
+        <div class="seg" id="stylSeg" role="group" aria-label="Stylus">
+          <button type="button" data-s="match" aria-pressed="true">Som pennen</button>
+          <button type="button" data-s="#141414" aria-pressed="false">Sort</button>
+          <button type="button" data-s="own" aria-pressed="false">Egen farve</button>
+        </div>
+        <div class="hexrow" id="stylHexRow" hidden>
+          <label for="stylHex">Stylus</label>
+          <input type="color" id="stylPick" value="#C8102E" aria-label="Vælg stylusfarve">
+          <input type="text" class="hex" id="stylHex" value="#C8102E" spellcheck="false" aria-label="Stylus hex-kode">
+        </div>
+        <p class="note">Databladet har også en variant helt uden stylus. Den har en anden top, som denne skabelon ikke kan vise.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Logo på produkt</h2>
+        <div class="drop" id="drop" role="button" tabindex="0">
+          <strong>Vælg logofil</strong>
+          <small>PNG eller SVG med gennemsigtig baggrund · træk den ind på billedet</small>
+        </div>
+        <input type="file" id="logoFile" accept="image/png,image/svg+xml,image/jpeg,image/webp" hidden>
+        <div class="filerow"><span class="name" id="logoName">Eksempel-logo</span>
+          <button class="btn ghost" id="logoClear" type="button">Fjern</button></div>
+
+        <div class="seg" id="trimSeg" role="group" aria-label="Beskæring af logofil" style="margin-top:12px">
+          <button type="button" data-t="1" aria-pressed="true">Beskær tom kant</button>
+          <button type="button" data-t="0" aria-pressed="false">Brug filen som den er</button>
+        </div>
+        <div class="trimrow" id="knockRow" hidden>
+          <label class="chk"><input type="checkbox" id="knockCb" checked> Fjern ensfarvet baggrund</label>
+        </div>
+        <p class="trimnote" id="trimTxt">&nbsp;</p>
+
+        <div class="seg" id="inkSeg" role="group" aria-label="Logofarve" style="margin-top:12px">
+          <button type="button" data-ink="tint" aria-pressed="true">Vælg farve</button>
+          <button type="button" data-ink="orig" aria-pressed="false">Behold filens farver</button>
+        </div>
+        <div class="hexrow" id="inkHexRow">
+          <label for="inkHex">Trykfarve</label>
+          <input type="color" id="inkPick" value="#FFFFFF" aria-label="Vælg trykfarve">
+          <input type="text" class="hex" id="inkHex" value="#FFFFFF" spellcheck="false" aria-label="Trykfarve hex-kode">
+        </div>
+
+        <div class="slider">
+          <label for="logoH">Højde på tryk</label><output id="logoHOut">4,3 mm</output>
+          <input type="range" id="logoH" min="1.5" max="20" step="0.1" value="4.3">
+        </div>
+        <button class="btn" id="maxBtn" type="button" style="margin-top:10px">Fyld zone 1 helt ud</button>
+        <div class="slider">
+          <label for="logoT">Placering langs pennen</label><output id="logoTOut">0 mm</output>
+          <input type="range" id="logoT" min="-45" max="45" step="0.5" value="0">
+        </div>
+        <div class="fit" id="fit"><span class="dot ok"></span><span id="fitTxt">Inden for zone 1</span></div>
+        <p class="note">Logofiler har næsten altid tom plads omkring mærket. Beskæringen måler selve mærket, så højden nedenfor er mærkets egen højde og ikke filens. Standardplaceringen er målt på et rigtigt tryk: 4,3 mm højt, 80 % oppe ad skaftet.</p>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <p>Farverne lægges som lak på den fotograferede overflade — lysets struktur, gummiglansen og kanterne kommer fra originalfotoet, så resultatet er et retoucheret produktfoto og ikke en 3D-tegning.</p>
+    <p>Lodret bygger på et blankt ALK105-foto (tabsfri kilde), diagonal på BCG-pennen. Metaldelene er kalibreret mod begge: Mørkegrå rammer ALK-pennens egne metaldele inden for 5,6 niveauer, Sølv rammer BCG-pennens inden for 4,3. 1× eksporterer i kildens egen opløsning; 2× er en opskalering og tilføjer ikke ny detalje. Leverandørens egne produktfotos har ingen kastet skygge, så skabelonen har heller ingen som udgangspunkt; den diagonale positur bærer dog en svag skygge fra sit kildefoto, som ikke kan fjernes. Slår du skyggen til, er den pennens egen silhuet projiceret ned på underlaget, ikke en pålagt effekt. Ved transparent baggrund dæmpes studielysets kantglimt, som ellers ville stå som en lys rand på mørke underlag. Mockup til salgsbrug; endelig trykfarve skal altid godkendes mod Pantone-vifte.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const SRC=1600;
+
+const POSES={
+  vert:{
+    axis:{cx:798.769,cy:757.719,dx:-0.0016657,dy:-0.9999986},
+    penT:[-735.28,636.73], barrelT:[-496.31,497.72],
+    pxAlong:9.8001, pxAcross:9.7923,
+    crop:[737,107,127,1401],
+    portrait:{x:547.3,y:72.9,w:604.7,h:1511.7}, contact:[802.0,1491.0],
+    logoT:295.2, logoH:4.3, shadowGain:0.10,
+    files:['pen_v1.png','pen_v2.png','pen_v3.png']
+  },
+  diag:{
+    axis:{cx:845.200,cy:787.779,dx:0.4411512,dy:-0.8974328},
+    penT:[-703.79,624.05], barrelT:[-492.41,484.37],
+    pxAlong:9.4846, pxAcross:9.3779,
+    crop:[520,211,639,1225],
+    portrait:{x:403.1,y:180.5,w:781.0,h:1327.0}, contact:[553.7,1420.0],
+    logoT:330.4, logoH:4.2, shadowGain:0.30,
+    files:['pen_d1.png','pen_d2.png','pen_d3.png']
+  }
+};
+const ZONE1={along:50,across:6}, ALLOVER={along:106};
+
+const PEN_SWATCHES=[
+  {n:"Sort",      c:"#262726"},
+  {n:"Navy 289C", c:"#1B3B59"},
+  {n:"Hvid",      c:"#FFFFFF"},
+  {n:"Rød 485C",  c:"#FF2F35"},
+  {n:"Chili grøn",c:"#057F4F"}
+];
+const METALS={
+  "Sølv":     ["#959595","#B7B7B7","#D7D7D7","#F2F2F2"],
+  "Krom":     ["#7E8790","#A8B3BC","#CFD9E0","#F8FBFC"],
+  "Mørkegrå": ["#1F1F1F","#5A5A5A","#969696","#D1D1D1"],
+  "Sort":     ["#0C0C0D","#1E1F21","#333538","#53565A"],
+  "Guld":     ["#BB9241","#E6B351","#FFCD78","#FFEEC8"],
+  "Rosaguld": ["#C98979","#F7A894","#FFC8B9","#FFE4DA"]
+};
+
+const state={
+  pose:"vert", pen:"#1B3B59", finish:1.0, metal:"Sølv", metalOwn:null,
+  stylus:"match", stylusOwn:"#C8102E", bg:"#FFFFFF", zone:false,
+  frame:"square", scale:1, shadow:0,
+  logoImg:null, logoSrc:null, trim:true, knockout:true,
+  inkMode:"tint", ink:"#FFFFFF", logoH:4.3, logoT:0
+};
+const DEF=JSON.parse(JSON.stringify(state));
+
+const $=s=>document.querySelector(s);
+function hx(c){c=c.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];
+  return [parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];}
+const okHex=v=>/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v.trim());
+function norm(v){v=v.trim();if(v[0]!=='#')v='#'+v;
+  if(v.length===4)v='#'+v[1]+v[1]+v[2]+v[2]+v[3]+v[3];return v.toUpperCase();}
+const nb=n=>String(n).replace('.',',');
+function shoulder(x){return x<=205?x:205+50*(1-Math.exp(-(x-205)/50));}
+function lut4(stops){
+  const S=stops.map(hx), o=new Uint8Array(768);
+  for(let i=0;i<256;i++){const t=i/255*3,j=Math.min(2,t|0),f=t-j;
+    for(let c=0;c<3;c++) o[i*3+c]=S[j][c]*(1-f)+S[j+1][c]*f;}
+  return o;
+}
+function ownRamp(h){const [r,g,b]=hx(h);
+  const f=(m,w)=>'#'+[r,g,b].map(v=>Math.round(Math.min(255,v*m+255*w)).toString(16).padStart(2,'0')).join('');
+  return lut4([f(.30,0),f(.68,0),f(1,0),f(.45,.55)]);
+}
+const P=()=>POSES[state.pose];
+
+/* ---------- layers (cropped to the pen; the rest of the frame is empty) --- */
+const LAY={};
+function loadImg(src){return new Promise((res,rej)=>{const i=new Image();
+  i.onload=()=>res(i); i.onerror=()=>rej(new Error(src)); i.src=src;});}
+async function loadPose(key){
+  if(LAY[key]) return LAY[key];
+  const p=POSES[key], [w,h]=[p.crop[2],p.crop[3]];
+  const imgs=await Promise.all(p.files.map(loadImg));
+  const data=imgs.map(im=>{
+    const c=document.createElement('canvas'); c.width=w; c.height=h;
+    const x=c.getContext('2d',{willReadFrequently:true});
+    x.drawImage(im,0,0); return x.getImageData(0,0,w,h).data;
+  });
+  LAY[key]={a:data[0],b:data[1],c:data[2],w,h};
+  return LAY[key];
+}
+
+/* ---------- geometry ---------- */
+function logoAnchor(){
+  const p=P(), t=p.logoT+state.logoT*p.pxAlong;
+  return {x:p.axis.cx+t*p.axis.dx, y:p.axis.cy+t*p.axis.dy,
+          rot:Math.atan2(p.axis.dy,p.axis.dx), t};
+}
+const iw=im=>im?(im.naturalWidth||im.width||0):0;
+const ih=im=>im?(im.naturalHeight||im.height||0):0;
+function logoSize(){
+  const h=state.logoH*P().pxAcross, im=state.logoImg;
+  const w=ih(im)?h*iw(im)/ih(im):h*2.455;
+  return {w,h};
+}
+function frameRect(){
+  return state.frame==='portrait' ? P().portrait : {x:0,y:0,w:SRC,h:SRC};
+}
+function exportDims(){const f=frameRect();
+  return [Math.round(f.w*state.scale),Math.round(f.h*state.scale)];}
+
+/* ---------- logo raster, in crop-local coordinates ---------- */
+let logoCache=null;
+function buildLogo(){
+  const L=LAY[state.pose], p=P();
+  if(!logoCache||logoCache.width!==L.w||logoCache.height!==L.h){
+    logoCache=document.createElement('canvas'); logoCache.width=L.w; logoCache.height=L.h;
+  }
+  const x=logoCache.getContext('2d',{willReadFrequently:true});
+  x.setTransform(1,0,0,1,0,0); x.clearRect(0,0,L.w,L.h);
+  const im=state.logoImg;
+  if(im&&iw(im)&&ih(im)){
+    const a=logoAnchor(), {w,h}=logoSize();
+    x.save();
+    x.translate(a.x-p.crop[0], a.y-p.crop[1]);
+    x.rotate(a.rot);
+    x.drawImage(im,-w/2,-h/2,w,h);
+    if(state.inkMode==='tint'){
+      x.globalCompositeOperation='source-in';
+      x.fillStyle=state.ink; x.fillRect(-L.w,-L.h,L.w*2,L.h*2);
+    }
+    x.restore();
+  }
+  return x.getImageData(0,0,L.w,L.h).data;
+}
+
+/* ---------- logo preparation: drop the file's empty margin ---------------
+   Promotional logo files are usually delivered on a large canvas with the mark
+   floating in the middle. Sized by the file's own height, the printed mark then
+   comes out far too small, so measure the ink itself and crop to it.         */
+function prepareLogo(){
+  const src=state.logoSrc;
+  if(!src){state.logoImg=null; state.trimInfo=null; return;}
+  const w0=iw(src), h0=ih(src);
+  if(!w0||!h0){state.logoImg=null; state.trimInfo=null; return;}
+  const sc=Math.min(1,1600/Math.max(w0,h0));
+  const W=Math.max(1,Math.round(w0*sc)), H=Math.max(1,Math.round(h0*sc));
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d',{willReadFrequently:true});
+  x.drawImage(src,0,0,W,H);
+  const img=x.getImageData(0,0,W,H), a=img.data;
+
+  let opaque=true;
+  for(let i=3;i<a.length;i+=4){ if(a[i]<250){opaque=false;break;} }
+  state.logoOpaque=opaque;
+
+  if(opaque&&state.knockout){
+    // corners agree on a background colour -> fade it out, feathered so the
+    // mark keeps its anti-aliased edge
+    const px=(cx,cy)=>{const i=(cy*W+cx)*4; return [a[i],a[i+1],a[i+2]];};
+    const cor=[px(0,0),px(W-1,0),px(0,H-1),px(W-1,H-1)];
+    const bg=[0,1,2].map(k=>cor.reduce((s,v)=>s+v[k],0)/4);
+    const spread=Math.max(...cor.map(v=>Math.max(...v.map((q,k)=>Math.abs(q-bg[k])))));
+    if(spread<14){
+      for(let i=0;i<a.length;i+=4){
+        const d=Math.abs(a[i]-bg[0])+Math.abs(a[i+1]-bg[1])+Math.abs(a[i+2]-bg[2]);
+        a[i+3]=Math.round(255*Math.min(1,Math.max(0,(d-22)/46)));
+      }
+      x.putImageData(img,0,0);
+    }
+  }
+
+  let x0=W,y0=H,x1=-1,y1=-1;
+  if(state.trim){
+    const d2=x.getImageData(0,0,W,H).data;
+    for(let y=0;y<H;y++) for(let px2=0;px2<W;px2++){
+      if(d2[(y*W+px2)*4+3]>8){
+        if(px2<x0)x0=px2; if(px2>x1)x1=px2;
+        if(y<y0)y0=y; if(y>y1)y1=y;
+      }
+    }
+  }
+  if(x1<x0||y1<y0){x0=0;y0=0;x1=W-1;y1=H-1;}
+  const cw=x1-x0+1, chh=y1-y0+1;
+  if(cw===W&&chh===H){
+    state.logoImg=c;
+    state.trimInfo=state.trim?{w:W,h:H,pct:0,opaque}:null;
+  }else{
+    const t=document.createElement('canvas'); t.width=cw; t.height=chh;
+    t.getContext('2d').drawImage(c,x0,y0,cw,chh,0,0,cw,chh);
+    state.logoImg=t;
+    state.trimInfo={w:cw,h:chh,pct:Math.round((1-(cw*chh)/(W*H))*100),opaque};
+  }
+  logoCache=null;
+}
+function trimText(){
+  const i=state.trimInfo, el=$('#trimTxt');
+  $('#knockRow').hidden=!(state.logoSrc&&state.logoOpaque);
+  if(!state.logoSrc){el.innerHTML='&nbsp;'; return;}
+  if(!state.trim){el.textContent='Filens fulde flade bruges'; return;}
+  el.textContent = i&&i.pct>0
+    ? 'Tom kant fjernet — '+i.pct+' % af filen · mærket er '+i.w+' × '+i.h+' px'
+    : 'Ingen tom kant at fjerne';
+}
+
+/* ---------- contact shadow -----------------------------------------------
+   The pen is projected onto a ground plane through the point where its tip
+   meets the surface: squashed towards that line, sheared away from the light,
+   then blurred in three passes and faded with distance. Nothing is invented
+   about the pen itself — the shadow is its own silhouette, and nothing is
+   drawn at the contact point beyond that projection. Each pose carries its own
+   gain, because an upright pen stacks its whole length into a small patch and
+   would otherwise come out twice as dark as the same pen lying diagonally.  */
+const SHEAR=0.13, SQUASH=0.055;
+const silCache={}, shadowCache={};
+function silhouette(){
+  if(silCache[state.pose]) return silCache[state.pose];
+  const L=LAY[state.pose], A=L.a;
+  const d=new ImageData(L.w,L.h), o=d.data;
+  for(let q=0;q<L.w*L.h;q++) o[q*4+3]=A[q*4+2];
+  const c=document.createElement('canvas'); c.width=L.w; c.height=L.h;
+  c.getContext('2d').putImageData(d,0,0);
+  return silCache[state.pose]=c;
+}
+function shadowLayer(){
+  if(shadowCache[state.pose]) return shadowCache[state.pose];
+  const p=P(), cx=p.contact[0], cy=p.contact[1], sil=silhouette();
+  const c=document.createElement('canvas'); c.width=SRC; c.height=SRC;
+  const x=c.getContext('2d');
+  [[42,0.13],[20,0.15],[7,0.12]].forEach(function(q){
+    x.save(); x.filter='blur('+q[0]+'px)'; x.globalAlpha=q[1];
+    x.translate(cx,cy); x.transform(1,0,-SHEAR,SQUASH,0,0); x.translate(-cx,-cy);
+    x.drawImage(sil,p.crop[0],p.crop[1]);
+    x.restore();
+  });
+  x.filter='none'; x.globalAlpha=1;
+  const g=x.createRadialGradient(cx,cy,12,cx,cy,390);
+  g.addColorStop(0,'rgba(0,0,0,1)');
+  g.addColorStop(0.42,'rgba(0,0,0,0.62)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  x.globalCompositeOperation='destination-in';
+  x.fillStyle=g; x.fillRect(0,0,SRC,SRC);
+  return shadowCache[state.pose]=c;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const L=LAY[state.pose], p=P();
+  const A=L.a,B=L.b,C=L.c, lg=buildLogo();
+  const out=new ImageData(L.w,L.h), o=out.data;
+  const penC=hx(state.pen);
+  const stC=hx(state.stylus==='match'?state.pen:(state.stylus==='own'?state.stylusOwn:state.stylus));
+  const ramp=state.metalOwn?ownRamp(state.metalOwn):lut4(METALS[state.metal]);
+  const g=state.finish, N=L.w*L.h;
+  // A cut-out lands on backgrounds the pen was never lit against. The silhouette's
+  // grazing highlight runs 0.40-0.87 in the white-light channel where the barrel
+  // itself sits at 0.02-0.15, so capping that channel at the barrel's own level
+  // removes the rim and leaves everything else exactly as photographed.
+  const sCap=state.bg==='transparent'?0.16:1;
+  for(let q=0;q<N;q++){
+    const i=q*4, cov=A[i+2]/255;
+    if(cov<0.0015){o[i+3]=0;continue;}
+    const k=A[i]/200, s=A[i+1]/255;
+    const wb=B[i]/255, wd=B[i+1]/255, wm=B[i+2]/255;
+    const sEff=sCap<1?(s<sCap?s:sCap):s;
+    const add=sEff*(1-(1-g)*(k>1?1:k))*255;
+    let r=0,gg=0,b=0;
+    if(wb>0){r+=wb*shoulder(k*penC[0]+add); gg+=wb*shoulder(k*penC[1]+add); b+=wb*shoulder(k*penC[2]+add);}
+    if(wd>0){r+=wd*shoulder(k*stC[0]+add);  gg+=wd*shoulder(k*stC[1]+add);  b+=wd*shoulder(k*stC[2]+add);}
+    if(wm>0){const m=C[i]*3; r+=wm*ramp[m]; gg+=wm*ramp[m+1]; b+=wm*ramp[m+2];}
+    const la=lg[i+3]/255*wb;
+    if(la>0.002){
+      const il=0.42+0.58*(C[i+1]/255);
+      r=r*(1-la)+lg[i]*il*la; gg=gg*(1-la)+lg[i+1]*il*la; b=b*(1-la)+lg[i+2]*il*la;
+    }
+    o[i]=r; o[i+1]=gg; o[i+2]=b; o[i+3]=cov*255;
+  }
+  const pen=document.createElement('canvas'); pen.width=L.w; pen.height=L.h;
+  pen.getContext('2d').putImageData(out,0,0);
+  const c=document.createElement('canvas'); c.width=SRC; c.height=SRC;
+  const x=c.getContext('2d');
+  if(state.bg!=='transparent'){x.fillStyle=state.bg; x.fillRect(0,0,SRC,SRC);}
+  if(state.shadow>0){x.globalAlpha=state.shadow*p.shadowGain; x.drawImage(shadowLayer(),0,0); x.globalAlpha=1;}
+  x.drawImage(pen,p.crop[0],p.crop[1]);
+  return c;
+}
+
+function drawZones(x,scale,ox,oy){
+  const p=P(), css=getComputedStyle(document.documentElement);
+  const z1=css.getPropertyValue('--zone1').trim()||'#C0392B';
+  const za=css.getPropertyValue('--zoneall').trim()||'#2E7D32';
+  x.save();
+  x.translate((p.axis.cx-ox)*scale,(p.axis.cy-oy)*scale);
+  x.rotate(Math.atan2(p.axis.dy,p.axis.dx));
+  const barLen=p.barrelT[1]-p.barrelT[0];
+  const aw=Math.min(ALLOVER.along*p.pxAlong,barLen)*scale, ah=9.5*p.pxAcross*scale;
+  const ac=(p.barrelT[0]+p.barrelT[1])/2*scale;
+  x.lineWidth=Math.max(1.2,2.2*scale); x.setLineDash([]);
+  x.strokeStyle=za; x.strokeRect(ac-aw/2,-ah/2,aw,ah);
+  const zw=ZONE1.along*p.pxAlong*scale, zh=ZONE1.across*p.pxAcross*scale;
+  // zone 1 is a SIZE limit, not a fixed spot: show the largest legal field that
+  // can hold the print where it sits, kept inside the barrel
+  const lo=p.barrelT[0]*scale+zw/2, hi=p.barrelT[1]*scale-zw/2;
+  const t=Math.min(Math.max((p.logoT+state.logoT*p.pxAlong)*scale,lo),hi);
+  x.strokeStyle=z1; x.setLineDash([9*scale,6*scale]);
+  x.strokeRect(t-zw/2,-zh/2,zw,zh);
+  x.restore(); x.setLineDash([]);
+  x.save();
+  x.font='500 13px "IBM Plex Mono", ui-monospace, monospace'; x.textBaseline='top';
+  x.fillStyle=z1; x.fillText('Zone 1 · 50 × 6 mm',14,14);
+  x.fillStyle=za; x.fillText('All over 360° · 106 × 29,83 mm',14,32);
+  x.restore();
+}
+
+/* ---------- paint ---------- */
+let pending=false;
+function paint(){
+  if(pending||!LAY[state.pose]) return; pending=true;
+  requestAnimationFrame(()=>{
+    pending=false;
+    const full=render(), f=frameRect();
+    const ar=f.w/f.h;
+    const vh=1000, vw=Math.round(vh*ar);
+    const v=$('#view');
+    if(v.width!==vw||v.height!==vh){v.width=vw; v.height=vh;}
+    $('#stage').style.aspectRatio=ar.toFixed(4)+' / 1';
+    const x=v.getContext('2d');
+    x.clearRect(0,0,vw,vh); x.imageSmoothingQuality='high';
+    x.drawImage(full,f.x,f.y,f.w,f.h,0,0,vw,vh);
+    if(state.zone) drawZones(x,vh/f.h,f.x,f.y);
+    $('#checker').style.display=state.bg==='transparent'?'block':'none';
+    const d=exportDims(); $('#dimTxt').textContent=d[0]+' × '+d[1]+' px';
+    updateFit();
+  });
+}
+
+function updateFit(){
+  const p=P(), {w,h}=logoSize();
+  const okW=w<=ZONE1.along*p.pxAlong+0.5;
+  const okH=h<=ZONE1.across*p.pxAcross+0.5;
+  const t=p.logoT+state.logoT*p.pxAlong;
+  const okT=(t-w/2)>p.barrelT[0]+6 && (t+w/2)<p.barrelT[1]-6;
+  const good=okW&&okH&&okT;
+  $('#fit').firstElementChild.className='dot '+((good||!state.logoImg)?'ok':'over');
+  $('#fitTxt').textContent = !state.logoImg ? 'Intet logo lagt på'
+    : good ? ('Inden for zone 1 · '+nb((w/p.pxAlong).toFixed(1))+' × '+nb((h/p.pxAcross).toFixed(1))+' mm')
+    : !okH ? 'For højt til zone 1 (maks. 6 mm) — kræver all over 360°'
+    : !okW ? 'For bredt til zone 1 (maks. 50 mm)'
+    : 'Rækker ud over skaftet';
+}
+
+/* ---------- unsharp for 2x export ---------- */
+function unsharp(x,w,h){
+  const src=x.getImageData(0,0,w,h), a=src.data, blur=new Uint8ClampedArray(a);
+  for(let y=1;y<h-1;y++) for(let px=1;px<w-1;px++){
+    const i=(y*w+px)*4;
+    for(let c=0;c<3;c++) blur[i+c]=(a[i+c-4]+a[i+c+4]+a[i+c-w*4]+a[i+c+w*4]+a[i+c]*2)/6;
+  }
+  for(let i=0;i<a.length;i+=4) for(let c=0;c<3;c++) a[i+c]=a[i+c]+0.55*(a[i+c]-blur[i+c]);
+  x.putImageData(src,0,0);
+}
+
+/* ---------- UI helpers ---------- */
+function swatchRow(host,items,get,set){
+  host.innerHTML='';
+  items.forEach(it=>{
+    const b=document.createElement('button');
+    b.type='button'; b.className='sw';
+    b.setAttribute('aria-pressed', get()===it.key?'true':'false');
+    b.innerHTML='<span class="chip"></span><span class="lbl"></span>';
+    b.querySelector('.chip').style.background=it.bg;
+    b.querySelector('.lbl').textContent=it.n;
+    b.addEventListener('click',()=>{set(it.key);
+      [...host.children].forEach(c=>c.setAttribute('aria-pressed','false'));
+      b.setAttribute('aria-pressed','true'); paint();});
+    host.appendChild(b);
+  });
+}
+function syncPenSw(){
+  [...$('#penSw').children].forEach((b,i)=>
+    b.setAttribute('aria-pressed', PEN_SWATCHES[i].c.toUpperCase()===state.pen.toUpperCase()?'true':'false'));
+}
+function metalItems(){
+  return Object.keys(METALS).map(n=>({key:n,n:n,
+    bg:'linear-gradient(145deg,'+METALS[n][3]+','+METALS[n][2]+' 38%,'+METALS[n][1]+' 68%,'+METALS[n][0]+')'}));
+}
+function segWire(sel,attr,fn){
+  const host=$(sel);
+  host.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    [...host.children].forEach(c=>c.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true'); fn(b.dataset[attr]);
+  });
+}
+function hexPair(pickSel,textSel,get,set){
+  const p=$(pickSel), t=$(textSel);
+  p.addEventListener('input',()=>{t.value=p.value.toUpperCase(); set(p.value.toUpperCase()); paint();});
+  t.addEventListener('input',()=>{if(okHex(t.value)){const v=norm(t.value); p.value=v; set(v); paint();}});
+  t.addEventListener('blur',()=>{t.value=get(); p.value=get();});
+}
+function toast(m){const e=document.createElement('div'); e.className='toast'; e.textContent=m;
+  document.body.appendChild(e); setTimeout(()=>e.remove(),3600);}
+function useLogoFile(f){
+  if(!f) return;
+  const im=new Image();
+  im.onload=()=>{state.logoSrc=im; prepareLogo(); trimText();
+    $('#logoName').textContent=f.name; paint();};
+  im.onerror=()=>toast('Filen kunne ikke læses. Prøv en PNG med gennemsigtig baggrund.');
+  im.src=URL.createObjectURL(f);
+}
+function fillZone(){
+  const p=P(), im=state.logoImg;
+  if(!im||!ih(im)) return;
+  const ar=iw(im)/ih(im);
+  const hMm=Math.min(ZONE1.across, ZONE1.along*p.pxAlong/(p.pxAcross*ar));
+  state.logoH=Math.max(1.5,Math.min(20,Math.round(hMm*10)/10));
+  const hs=$('#logoH'); hs.value=state.logoH;
+  $('#logoHOut').textContent=nb(state.logoH.toFixed(1))+' mm';
+  paint();
+}
+let dlNS;
+async function downloads(){
+  if(dlNS!==undefined) return dlNS;
+  try{dlNS = window.claude&&window.claude.use ? await window.claude.use('downloads') : null;}
+  catch(_){dlNS=null;}
+  return dlNS;
+}
+
+/* ---------- boot ---------- */
+async function boot(){
+  try{
+    await loadPose('vert');
+    state.logoSrc=await loadImg('sample-logo.png'); prepareLogo(); trimText();
+    $('#loading').remove();
+  }catch(e){
+    $('#loading').textContent='Kunne ikke indlæse billedlagene. Genindlæs siden.'; return;
+  }
+  loadPose('diag').catch(()=>{});
+
+  swatchRow($('#penSw'),PEN_SWATCHES.map(s=>({key:s.c,n:s.n,bg:s.c})),
+    ()=>state.pen,v=>{state.pen=v; $('#penPick').value=v; $('#penHex').value=v.toUpperCase();});
+  swatchRow($('#metalSw'),metalItems(),()=>state.metal,v=>{state.metal=v; state.metalOwn=null;});
+
+  hexPair('#penPick','#penHex',()=>state.pen,v=>{state.pen=v; syncPenSw();});
+  hexPair('#metPick','#metHex',()=>state.metalOwn||'#7A6A3A',v=>{state.metalOwn=v;
+    [...$('#metalSw').children].forEach(c=>c.setAttribute('aria-pressed','false'));});
+  hexPair('#stylPick','#stylHex',()=>state.stylusOwn,v=>{state.stylusOwn=v;});
+  hexPair('#inkPick','#inkHex',()=>state.ink,v=>{state.ink=v;});
+
+  segWire('#finishSeg','g',v=>{state.finish=parseFloat(v); paint();});
+  segWire('#stylSeg','s',v=>{state.stylus=v; $('#stylHexRow').hidden=v!=='own'; paint();});
+  segWire('#inkSeg','ink',v=>{state.inkMode=v; $('#inkHexRow').hidden=v!=='tint'; paint();});
+  segWire('#bgSeg','bg',v=>{state.bg=v; paint();});
+  segWire('#shadowSeg','s',v=>{state.shadow=parseFloat(v); paint();});
+  segWire('#frameSeg','f',v=>{state.frame=v; paint();});
+  segWire('#sizeSeg','x',v=>{state.scale=+v; paint();});
+  segWire('#poseSeg','p',async v=>{
+    state.pose=v; logoCache=null;
+    const hs=$('#logoH');
+    state.logoH=POSES[v].logoH; hs.value=state.logoH;
+    $('#logoHOut').textContent=nb(state.logoH.toFixed(1))+' mm';
+    if(!LAY[v]){ $('#dimTxt').textContent='indlæser …'; await loadPose(v); }
+    paint();
+  });
+
+  $('#zoneBtn').addEventListener('click',()=>{
+    state.zone=!state.zone;
+    $('#zoneBtn').setAttribute('aria-pressed',String(state.zone));
+    $('#zoneBtn').textContent=state.zone?'Skjul trykfelt':'Vis trykfelt'; paint();
+  });
+
+  const hs=$('#logoH'), ts=$('#logoT');
+  hs.addEventListener('input',()=>{state.logoH=+hs.value;
+    $('#logoHOut').textContent=nb(state.logoH.toFixed(1))+' mm'; paint();});
+  ts.addEventListener('input',()=>{state.logoT=+ts.value;
+    $('#logoTOut').textContent=(state.logoT>0?'+':'')+nb(state.logoT.toFixed(0))+' mm'; paint();});
+
+  $('#drop').addEventListener('click',()=>$('#logoFile').click());
+  $('#drop').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('#logoFile').click();}});
+  $('#logoFile').addEventListener('change',e=>useLogoFile(e.target.files[0]));
+  $('#logoClear').addEventListener('click',()=>{state.logoImg=null; state.logoSrc=null;
+    state.trimInfo=null; logoCache=null;
+    $('#logoName').textContent='Intet logo'; trimText(); paint();});
+  segWire('#trimSeg','t',v=>{state.trim=v==='1'; prepareLogo(); trimText(); paint();});
+  $('#knockCb').addEventListener('change',e=>{state.knockout=e.target.checked;
+    prepareLogo(); trimText(); paint();});
+  $('#maxBtn').addEventListener('click',fillZone);
+
+  const st=$('#stage');
+  ['dragenter','dragover'].forEach(ev=>st.addEventListener(ev,e=>{e.preventDefault(); st.classList.add('drag');}));
+  ['dragleave','drop'].forEach(ev=>st.addEventListener(ev,e=>{e.preventDefault(); st.classList.remove('drag');}));
+  st.addEventListener('drop',e=>useLogoFile(e.dataTransfer.files[0]));
+
+  $('#themeBtn').addEventListener('click',()=>{
+    const r=document.documentElement;
+    const now=r.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    r.setAttribute('data-theme',now==='dark'?'light':'dark'); paint();
+  });
+
+  $('#resetBtn').addEventListener('click',async()=>{
+    Object.assign(state,JSON.parse(JSON.stringify(DEF)));
+    state.logoImg=null; state.logoSrc=null; logoCache=null;
+    loadImg('sample-logo.png').then(im=>{state.logoSrc=im; prepareLogo(); trimText(); paint();}).catch(()=>{});
+    $('#penPick').value=state.pen; $('#penHex').value=state.pen;
+    $('#inkPick').value=state.ink; $('#inkHex').value=state.ink;
+    $('#logoName').textContent='Eksempel-logo';
+    hs.value=state.logoH; ts.value=0;
+    $('#logoHOut').textContent='4,3 mm'; $('#logoTOut').textContent='0 mm';
+    $('#stylHexRow').hidden=true; $('#inkHexRow').hidden=false;
+    $('#zoneBtn').setAttribute('aria-pressed','false'); $('#zoneBtn').textContent='Vis trykfelt';
+    $('#knockCb').checked=true;
+    const firstOn={finishSeg:2,stylSeg:0,inkSeg:0,bgSeg:0,frameSeg:0,sizeSeg:0,poseSeg:0,trimSeg:0,shadowSeg:0};
+    document.querySelectorAll('.seg').forEach(sg=>{
+      const on=firstOn[sg.id]||0;
+      [...sg.children].forEach((c,i)=>c.setAttribute('aria-pressed',String(i===on)));
+    });
+    syncPenSw();
+    swatchRow($('#metalSw'),metalItems(),()=>state.metal,v=>{state.metal=v; state.metalOwn=null;});
+    paint();
+  });
+
+  $('#dlBtn').addEventListener('click',async()=>{
+    const btn=$('#dlBtn'); const d=exportDims();
+    btn.disabled=true; btn.textContent='Renderer '+d.join(' × ')+' …';
+    await new Promise(r=>setTimeout(r,20));
+    let blob;
+    try{
+      const full=render(), f=frameRect();
+      const c=document.createElement('canvas'); c.width=d[0]; c.height=d[1];
+      const x=c.getContext('2d'); x.imageSmoothingQuality='high';
+      x.drawImage(full,f.x,f.y,f.w,f.h,0,0,d[0],d[1]);
+      if(state.scale>1) unsharp(x,d[0],d[1]);
+      blob=await new Promise(res=>c.toBlob(res,'image/png'));
+    }finally{btn.disabled=false; btn.textContent='Hent PNG';}
+    const name='BND188AL_'+state.pose+'_'+state.pen.replace('#','').toLowerCase()
+      +'_'+state.metal.toLowerCase().replace(/[^a-z]/g,'')+'.png';
+    const dl=await downloads();
+    if(dl){
+      try{await dl.save({filename:name,data:blob}); toast('Gemt som '+name);}
+      catch(e){if(!(e&&e.code==='declined'))
+        toast('Kunne ikke gemme filen ('+((e&&e.code)||'ukendt')+').');}
+      return;
+    }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=name; document.body.appendChild(a); a.click();
+    a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000);
+    toast('Hentet som '+name);
+  });
+
+  paint();
+}
+boot();
+})();
+</script>
+
+</body>
+</html>
