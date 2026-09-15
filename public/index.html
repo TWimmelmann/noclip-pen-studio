@@ -409,8 +409,34 @@ async function loadPose(key){
     const x=c.getContext('2d',{willReadFrequently:true});
     x.drawImage(im,0,0); return x.getImageData(0,0,w,h).data;
   });
-  LAY[key]={a:data[0],b:data[1],c:data[2],w,h};
+  // the lacquer's lit face: 92nd percentile of k over the solid barrel. Light
+  // colours are compressed toward this level, see lightContrast()
+  const hist=new Uint32Array(256); let nH=0;
+  for(let i=0;i<w*h*4;i+=4) if(data[1][i]>242&&data[0][i+2]>250){hist[data[0][i]]++; nH++;}
+  let acc=0,kHi=1; for(let v=0;v<256;v++){acc+=hist[v]; if(acc>=nH*0.92){kHi=v/200; break;}}
+  LAY[key]={a:data[0],b:data[1],c:data[2],w,h,kHi,imgs};
   return LAY[key];
+}
+
+/* Layers at S times their stored resolution. Export used to render at 1600 px
+   and then stretch the finished picture, which blurred it, and sharpening it
+   afterwards brought the JPEG residue back up. Interpolating the coefficients
+   first and colouring afterwards keeps edges and the tone curve clean, and lets
+   the print be drawn at the full output size. */
+const LAYS={};
+function layersAt(S){
+  const L=LAY[state.pose];
+  if(S===1) return L;
+  const key=state.pose+'@'+S;
+  if(LAYS[key]) return LAYS[key];
+  const w=L.w*S, h=L.h*S;
+  const data=L.imgs.map(im=>{
+    const c=document.createElement('canvas'); c.width=w; c.height=h;
+    const x=c.getContext('2d',{willReadFrequently:true});
+    x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high';
+    x.drawImage(im,0,0,w,h); return x.getImageData(0,0,w,h).data;
+  });
+  return LAYS[key]={a:data[0],b:data[1],c:data[2],w,h,kHi:L.kHi};
 }
 
 /* ---------- geometry ---------- */
@@ -434,8 +460,8 @@ function exportDims(){const f=frameRect();
 
 /* ---------- logo raster, in crop-local coordinates ---------- */
 let logoCache=null;
-function buildLogo(){
-  const L=LAY[state.pose], p=P();
+function buildLogo(S){
+  const L=layersAt(S), p=P();
   if(!logoCache||logoCache.width!==L.w||logoCache.height!==L.h){
     logoCache=document.createElement('canvas'); logoCache.width=L.w; logoCache.height=L.h;
   }
@@ -445,6 +471,8 @@ function buildLogo(){
   if(im&&iw(im)&&ih(im)){
     const a=logoAnchor(), {w,h}=logoSize();
     x.save();
+    x.scale(S,S);
+    x.imageSmoothingEnabled=true; x.imageSmoothingQuality='high';
     x.translate(a.x-p.crop[0], a.y-p.crop[1]);
     x.rotate(a.rot);
     x.drawImage(im,-w/2,-h/2,w,h);
@@ -566,15 +594,30 @@ function shadowLayer(){
   return shadowCache[state.pose]=c;
 }
 
+/* ---------- light colours ----------
+   The shading in the layers was measured on a saturated pen, where the dark side
+   of the barrel drops ~40 % below the lit side. A light soft-touch pen does not do
+   that: light scatters inside the coating and bounces back from the surroundings.
+   Measured on a real mint BND188AL (ca. #D3E5E3) the barrel varies only ~4 %
+   edge to centre. Multiplying white by the saturated pen's shading therefore gave
+   a grey aluminium tube with a dark rim. Shading depth is scaled down with the
+   colour's luminance: dark and saturated colours keep the photo's contrast, white
+   keeps ~30 % of it. */
+function lightContrast(rgb){
+  const Y=(0.2126*rgb[0]+0.7152*rgb[1]+0.0722*rgb[2])/255;
+  return 1-0.72*Y*Y;
+}
+
 /* ---------- render ---------- */
-function render(){
-  const L=LAY[state.pose], p=P();
-  const A=L.a,B=L.b,C=L.c, lg=buildLogo();
+function render(S=1){
+  const L=layersAt(S), p=P();
+  const A=L.a,B=L.b,C=L.c, lg=buildLogo(S);
   const out=new ImageData(L.w,L.h), o=out.data;
   const penC=hx(state.pen);
   const stC=hx(state.stylus==='match'?state.pen:(state.stylus==='own'?state.stylusOwn:state.stylus));
   const ramp=state.metalOwn?ownRamp(state.metalOwn):lut4(METALS[state.metal]);
   const g=state.finish, N=L.w*L.h;
+  const kHi=L.kHi, cPen=lightContrast(penC), cSt=lightContrast(stC);
   // A cut-out lands on backgrounds the pen was never lit against. The silhouette's
   // grazing highlight runs 0.40-0.87 in the white-light channel where the barrel
   // itself sits at 0.02-0.15, so capping that channel at the barrel's own level
@@ -583,13 +626,14 @@ function render(){
   for(let q=0;q<N;q++){
     const i=q*4, cov=A[i+2]/255;
     if(cov<0.0015){o[i+3]=0;continue;}
-    const k=A[i]/200, s=A[i+1]/255;
+    const k0=A[i]/200, s=A[i+1]/255;
+    const k=kHi-(kHi-k0)*cPen, kd=kHi-(kHi-k0)*cSt;
     const wb=B[i]/255, wd=B[i+1]/255, wm=B[i+2]/255;
     const sEff=sCap<1?(s<sCap?s:sCap):s;
     const add=sEff*(1-(1-g)*(k>1?1:k))*255;
     let r=0,gg=0,b=0;
     if(wb>0){r+=wb*shoulder(k*penC[0]+add); gg+=wb*shoulder(k*penC[1]+add); b+=wb*shoulder(k*penC[2]+add);}
-    if(wd>0){r+=wd*shoulder(k*stC[0]+add);  gg+=wd*shoulder(k*stC[1]+add);  b+=wd*shoulder(k*stC[2]+add);}
+    if(wd>0){r+=wd*shoulder(kd*stC[0]+add);  gg+=wd*shoulder(kd*stC[1]+add);  b+=wd*shoulder(kd*stC[2]+add);}
     if(wm>0){const m=C[i]*3; r+=wm*ramp[m]; gg+=wm*ramp[m+1]; b+=wm*ramp[m+2];}
     const la=lg[i+3]/255*wb;
     if(la>0.002){
@@ -600,11 +644,11 @@ function render(){
   }
   const pen=document.createElement('canvas'); pen.width=L.w; pen.height=L.h;
   pen.getContext('2d').putImageData(out,0,0);
-  const c=document.createElement('canvas'); c.width=SRC; c.height=SRC;
-  const x=c.getContext('2d');
-  if(state.bg!=='transparent'){x.fillStyle=state.bg; x.fillRect(0,0,SRC,SRC);}
-  if(state.shadow>0){x.globalAlpha=state.shadow*p.shadowGain; x.drawImage(shadowLayer(),0,0); x.globalAlpha=1;}
-  x.drawImage(pen,p.crop[0],p.crop[1]);
+  const c=document.createElement('canvas'); c.width=SRC*S; c.height=SRC*S;
+  const x=c.getContext('2d'); x.imageSmoothingQuality='high';
+  if(state.bg!=='transparent'){x.fillStyle=state.bg; x.fillRect(0,0,SRC*S,SRC*S);}
+  if(state.shadow>0){x.globalAlpha=state.shadow*p.shadowGain; x.drawImage(shadowLayer(),0,0,SRC*S,SRC*S); x.globalAlpha=1;}
+  x.drawImage(pen,p.crop[0]*S,p.crop[1]*S);
   return c;
 }
 
@@ -670,17 +714,6 @@ function updateFit(){
     : !okH ? 'For højt til zone 1 (maks. 6 mm) — kræver all over 360°'
     : !okW ? 'For bredt til zone 1 (maks. 50 mm)'
     : 'Rækker ud over skaftet';
-}
-
-/* ---------- unsharp for 2x export ---------- */
-function unsharp(x,w,h){
-  const src=x.getImageData(0,0,w,h), a=src.data, blur=new Uint8ClampedArray(a);
-  for(let y=1;y<h-1;y++) for(let px=1;px<w-1;px++){
-    const i=(y*w+px)*4;
-    for(let c=0;c<3;c++) blur[i+c]=(a[i+c-4]+a[i+c+4]+a[i+c-w*4]+a[i+c+w*4]+a[i+c]*2)/6;
-  }
-  for(let i=0;i<a.length;i+=4) for(let c=0;c<3;c++) a[i+c]=a[i+c]+0.55*(a[i+c]-blur[i+c]);
-  x.putImageData(src,0,0);
 }
 
 /* ---------- UI helpers ---------- */
@@ -848,11 +881,11 @@ async function boot(){
     await new Promise(r=>setTimeout(r,20));
     let blob;
     try{
-      const full=render(), f=frameRect();
+      const S=Math.max(2,Math.ceil(state.scale));
+      const full=render(S), f=frameRect();
       const c=document.createElement('canvas'); c.width=d[0]; c.height=d[1];
       const x=c.getContext('2d'); x.imageSmoothingQuality='high';
-      x.drawImage(full,f.x,f.y,f.w,f.h,0,0,d[0],d[1]);
-      if(state.scale>1) unsharp(x,d[0],d[1]);
+      x.drawImage(full,f.x*S,f.y*S,f.w*S,f.h*S,0,0,d[0],d[1]);
       blob=await new Promise(res=>c.toBlob(res,'image/png'));
     }finally{btn.disabled=false; btn.textContent='Hent PNG';}
     const name='BND188AL_'+state.pose+'_'+state.pen.replace('#','').toLowerCase()
