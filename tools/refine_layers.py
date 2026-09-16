@@ -22,7 +22,7 @@ from PIL import Image
 F=np.float32
 
 POSES={
- 'v':dict(c=(798.769,757.719),d=(-0.0016657,-0.9999986),crop=(737,107),barrelT=(-496.31,497.72)),
+ 'v':dict(c=(798.769,757.719),d=(0.0,-1.0),crop=(737,107),barrelT=(-496.31,497.72)),
  'd':dict(c=(845.200,787.779),d=(0.4411512,-0.8974328),crop=(520,211),barrelT=(-492.41,484.37)),
 }
 
@@ -51,6 +51,9 @@ def refine(folder, tag, P):
             sd=max(np.std(r[m]),0.3); m=np.abs(r)<2.5*sd
         return p
     pl,ph=robust_line(T,lo),robust_line(T,hi)
+    # a barrel is a cylinder: both sides share one direction
+    m=(pl[0]+ph[0])/2; tm=T.mean()
+    pl=np.array([m,np.polyval(pl,tm)-m*tm]); ph=np.array([m,np.polyval(ph,tm)-m*tm])
     LO=np.polyval(pl,t); HI=np.polyval(ph,t)
     # pick the offset that keeps the barrel's area exactly as photographed
     ref=cov[win&(np.abs(n-(LO+HI)/2)<(HI-LO)/2+6)].sum()
@@ -94,12 +97,13 @@ def refine(folder, tag, P):
     s2=s2*damp
 
     # ---- 3. smooth along the axis -------------------------------------------
-    sig=8.0; r=int(3*sig)
+    sig=14.0; r=int(3*sig)
     yy,xx=np.mgrid[-r:r+1,-r:r+1].astype(F)
     a=xx*dx+yy*dy; b=xx*nx+yy*ny
     K=np.exp(-(a*a)/(2*sig*sig)-(b*b)/(2*0.5*0.5)); K=(K/K.sum()).astype(F)
-    core=(win&(dist>2.5)).astype(F)
-    core=cv2.GaussianBlur(core,(0,0),1.5)*(win&(dist>1.5))
+    # the rim is included: its tone still follows the old pixel-stepped edge,
+    # and along a now straight edge neighbours at the same depth are equivalent
+    core=((win&(dist>-2)).astype(F))*fe
     def along(x):
         num=cv2.filter2D(x*core,-1,K,borderType=cv2.BORDER_REPLICATE)
         den=cv2.filter2D(core,-1,K,borderType=cv2.BORDER_REPLICATE)
